@@ -1,3 +1,5 @@
+const EnhancedTask = require('../models/EnhancedTask');
+
 class TaskRepository {
     constructor(storageManager) {
         this.storage = storageManager;
