@@ -64,69 +64,97 @@
 
         <!-- Task Creation Form -->
         <section class="form-section">
-          <h2>Create New Task</h2>
+          <h2>Buat Task Baru</h2>
           <form id="taskForm" class="task-form">
+            <div class="form-row">
               <div class="form-group">
-                  <label for="taskTitle">Task Title *</label>
-                  <input type="text" id="taskTitle" name="title" required placeholder="Enter task title">
+                <label for="taskTitle">Judul Task *</label>
+                <input
+                  type="text"
+                  id="taskTitle"
+                  name="title"
+                  required
+                  placeholder="Masukkan judul task"
+                />
               </div>
-              
+
               <div class="form-group">
-                  <label for="taskDescription">Description</label>
-                  <textarea id="taskDescription" name="description" placeholder="Enter task description (optional)"></textarea>
+                <label for="taskCategory">Kategori</label>
+                <select id="taskCategory" name="category">
+                  <option value="personal">Personal</option>
+                  <option value="work">Work</option>
+                  <option value="study">Study</option>
+                  <option value="health">Health</option>
+                  <option value="finance">Finance</option>
+                  <option value="other">Other</option>
+                </select>
               </div>
-              
-              <!-- NEW: Category selector -->
+            </div>
+
+            <div class="form-group">
+              <label for="taskDescription">Deskripsi</label>
+              <textarea
+                id="taskDescription"
+                name="description"
+                placeholder="Deskripsi task (opsional)"
+                rows="3"
+              ></textarea>
+            </div>
+
+            <div class="form-row">
               <div class="form-group">
-                  <label for="taskCategory">Category</label>
-                  <select id="taskCategory" name="category">
-                      <option value="personal">Personal</option>
-                      <option value="work">Work & Business</option>
-                      <option value="study">Study & Learning</option>
-                      <option value="health">Health & Fitness</option>
-                      <option value="finance">Finance & Money</option>
-                      <option value="shopping">Shopping</option>
-                      <option value="other">Other</option>
-                  </select>
+                <label for="taskPriority">Prioritas</label>
+                <select id="taskPriority" name="priority">
+                  <option value="low">Low</option>
+                  <option value="medium" selected>Medium</option>
+                  <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
+                </select>
               </div>
-              
+
               <div class="form-group">
-                  <label for="taskPriority">Priority</label>
-                  <select id="taskPriority" name="priority">
-                      <option value="low">Low</option>
-                      <option value="medium" selected>Medium</option>
-                      <option value="high">High</option>
-                  </select>
+                <label for="taskDueDate">Due Date</label>
+                <input type="date" id="taskDueDate" name="dueDate" />
               </div>
-              
-              <button type="submit" class="btn btn-primary">Create Task</button>
+
+              <div class="form-group">
+                <label for="taskEstimatedHours">Estimasi Jam</label>
+                <input
+                  type="number"
+                  id="taskEstimatedHours"
+                  name="estimatedHours"
+                  min="0"
+                  step="0.5"
+                  placeholder="0"
+                />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="taskTags">Tags (pisahkan dengan koma)</label>
+                <input
+                  type="text"
+                  id="taskTags"
+                  name="tags"
+                  placeholder="urgent, meeting, project"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="taskAssignee">Assign ke</label>
+                <select id="taskAssignee" name="assigneeId">
+                  <option value="self">Diri Sendiri</option>
+                  <!-- Options akan diisi dari JavaScript -->
+                </select>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-large">
+              Buat Task
+            </button>
           </form>
-      </section>
-      
-      <!-- NEW: Category filter section -->
-      <section class="filter-section">
-          <h2>Filter Tasks</h2>
-          <div class="filter-buttons">
-              <button class="filter-btn active" data-filter="all">All Tasks</button>
-              <button class="filter-btn" data-filter="pending">Pending</button>
-              <button class="filter-btn" data-filter="completed">Completed</button>
-              <button class="filter-btn" data-filter="high">High Priority</button>
-          </div>
-          
-          <!-- NEW: Category filters -->
-          <div class="category-filters">
-              <h3>By Category</h3>
-              <div class="category-buttons">
-                  <button class="category-btn" data-category="personal">Personal</button>
-                  <button class="category-btn" data-category="work">Work</button>
-                  <button class="category-btn" data-category="study">Study</button>
-                  <button class="category-btn" data-category="health">Health</button>
-                  <button class="category-btn" data-category="finance">Finance</button>
-                  <button class="category-btn" data-category="shopping">Shopping</button>
-                  <button class="category-btn" data-category="other">Other</button>
-              </div>
-          </div>
-      </section>
+        </section>
 
         <!-- Search dan Filter -->
         <section class="search-filter-section">

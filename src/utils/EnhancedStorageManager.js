@@ -313,12 +313,23 @@ class EnhancedStorageManager {
     }
     
     _updateMetadata(entity, timestamp) {
+        if (entity === '_metadata') {
+            return;
+        }
+
         const metadata = this.getMetadata();
         metadata.entities[entity] = {
             lastUpdated: timestamp,
             version: this.version
         };
-        this.save('_metadata', metadata);
+
+        const key = this._getKey('_metadata');
+        const dataToSave = {
+            data: metadata,
+            timestamp: new Date().toISOString(),
+            version: this.version
+        };
+        localStorage.setItem(key, JSON.stringify(dataToSave));
     }
     
     _removeFromMetadata(entity) {

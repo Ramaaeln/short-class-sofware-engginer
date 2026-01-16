@@ -1,4 +1,8 @@
-const User = require('../models/User');
+if (typeof require !== 'undefined' && typeof module !== 'undefined') {
+    if (typeof User === 'undefined') {
+        User = require('../models/User');
+    }
+}
 
 class UserRepository {
     constructor(storageManager) {
@@ -249,9 +253,12 @@ class UserRepository {
     }
 }
 
-// Export untuk digunakan di file lain
-if (typeof module !== 'undefined' && module.exports) {
+// Export untuk Node.js (Jest)
+if (typeof module !== 'undefined') {
     module.exports = UserRepository;
-} else {
+}
+
+// Export untuk Browser
+if (typeof window !== 'undefined') {
     window.UserRepository = UserRepository;
 }

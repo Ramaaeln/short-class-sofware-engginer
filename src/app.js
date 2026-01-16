@@ -12,27 +12,42 @@ let app = {
 * Initialize aplikasi
 */
 function initializeApp() {
-    console.log('🚀 Initializing Task Management System...');
-    
-    // Initialize storage manager
-    storageManager = new StorageManager('taskApp');
-    
-    // Initialize task service
-    taskService = new TaskService(storageManager);
-    
-    // Set up event listeners
-    setupEventListeners();
-    
-    // Listen for task service events
-    taskService.addListener(handleTaskServiceEvent);
-    
-    // Render initial UI
-    renderTaskList();
-    renderTaskStats();
-    renderCategoryStats(); // NEW: Render category stats
-    
-    console.log('✅ Application initialized successfully!');
-    console.log(`📊 Loaded ${taskService.getAllTasks().length} existing tasks`);
+  console.log('🚀 Initializing Day 2 Task Management System...');
+  
+  try {
+      // Initialize storage manager
+      app.storage = new EnhancedStorageManager('taskAppDay2', '2.0');
+      console.log('✅ Storage manager initialized');
+      
+      // Initialize repositories
+      app.userRepository = new UserRepository(app.storage);
+      app.taskRepository = new TaskRepository(app.storage);
+      console.log('✅ Repositories initialized');
+      
+      // Initialize controllers
+      app.userController = new UserController(app.userRepository);
+      app.taskController = new TaskController(app.taskRepository, app.userRepository);
+      console.log('✅ Controllers initialized');
+      
+      // Initialize view
+      app.taskView = new TaskView(app.taskController, app.userController);
+      console.log('✅ Views initialized');
+      
+      // Setup authentication event listeners
+      setupAuthEventListeners();
+      
+      // Create demo user jika belum ada
+      createDemoUserIfNeeded();
+      
+      // Show login section
+      showLoginSection();
+      
+      console.log('✅ Day 2 Application initialized successfully!');
+      
+  } catch (error) {
+      console.error('❌ Failed to initialize application:', error);
+      showMessage('Gagal menginisialisasi aplikasi: ' + error.message, 'error');
+  }
 }
 
 /**
@@ -65,7 +80,33 @@ function setupAuthEventListeners() {
               handleLogin();
           }
       });
-  }
+      document.addEventListener('click', (e) => {
+        if (e.target.matches('.btn') && !e.target.classList.contains('loading')) {
+            // Add loading class
+            e.target.classList.add('loading');
+            
+            // Remove after action completes
+            setTimeout(() => {
+                e.target.classList.remove('loading');
+            }, 500);
+        }
+    });
+    
+    // Add smooth scroll untuk anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+}
+  
   
   // Register form
   const registerForm = document.getElementById('registerForm');
@@ -377,180 +418,6 @@ function showMessage(message, type = 'info') {
   } else {
       console.log(`${type.toUpperCase()}: ${message}`);
   }
-}
-const categoryButtons = document.querySelectorAll('.category-btn');
-categoryButtons.forEach(btn => {
-    btn.addEventListener('click', handleCategoryFilter);
-});
-
-function handleCategoryFilter(event) {
-    const category = event.target.dataset.category;
-    
-    // Update active category button
-    document.querySelectorAll('.category-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    event.target.classList.add('active');
-    
-    // Clear other filters
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // Render tasks filtered by category
-    renderTaskList('category', category);
-}
-
-function renderTaskList(filterType = 'all', filterValue = null) {
-    const taskListContainer = document.getElementById('taskList');
-    if (!taskListContainer) return;
-    
-    let tasks = taskService.getAllTasks();
-    
-    // Apply filters
-    switch (filterType) {
-        case 'pending':
-            tasks = tasks.filter(task => !task.completed);
-            break;
-        case 'completed':
-            tasks = tasks.filter(task => task.completed);
-            break;
-        case 'high':
-            tasks = tasks.filter(task => task.priority === 'high');
-            break;
-        case 'medium':
-            tasks = tasks.filter(task => task.priority === 'medium');
-            break;
-        case 'low':
-            tasks = tasks.filter(task => task.priority === 'low');
-            break;
-        case 'category':
-            tasks = tasks.filter(task => task.category === filterValue);
-            break;
-    }
-    
-    // Sort tasks by creation date (newest first)
-    tasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    
-    if (tasks.length === 0) {
-        const filterText = filterType === 'category' ? 
-            `in ${filterValue} category` : 
-            `with ${filterType} filter`;
-            
-        taskListContainer.innerHTML = `
-            <div class="empty-state">
-                <p>No tasks found ${filterText}</p>
-                <small>Create your first task using the form above</small>
-            </div>
-        `;
-        return;
-    }
-    
-    const taskHTML = tasks.map(task => createTaskHTML(task)).join('');
-    taskListContainer.innerHTML = taskHTML;
-}
-
-
-
-function createTaskHTML(task) {
-    const priorityClass = `priority-${task.priority}`;
-    const completedClass = task.completed ? 'completed' : '';
-    const categoryClass = `category-${task.category}`;
-    const createdDate = new Date(task.createdAt).toLocaleDateString();
-    
-    // Get category display name
-    const categoryDisplayNames = {
-        'work': 'Work',
-        'personal': 'Personal',
-        'study': 'Study',
-        'health': 'Health',
-        'finance': 'Finance',
-        'shopping': 'Shopping',
-        'other': 'Other'
-    };
-    
-    const categoryDisplay = categoryDisplayNames[task.category] || task.category;
-    
-    return `
-        <div class="task-item ${priorityClass} ${completedClass}" data-task-id="${task.id}">
-            <div class="task-content">
-                <div class="task-header">
-                    <h3 class="task-title">${escapeHtml(task.title)}</h3>
-                    <div class="task-badges">
-                        <span class="task-priority">${task.priority}</span>
-                        <span class="task-category ${categoryClass}">${categoryDisplay}</span>
-                    </div>
-                </div>
-                ${task.description ? `<p class="task-description">${escapeHtml(task.description)}</p>` : ''}
-                <div class="task-meta">
-                    <small>Created: ${createdDate}</small>
-                    ${task.completed ? `<small>Completed: ${new Date(task.updatedAt).toLocaleDateString()}</small>` : ''}
-                </div>
-            </div>
-            <div class="task-actions">
-                <button class="btn btn-toggle" onclick="handleTaskToggle('${task.id}')" title="${task.completed ? 'Mark incomplete' : 'Mark complete'}">
-                    ${task.completed ? '↶' : '✓'}
-                </button>
-                <button class="btn btn-delete" onclick="handleTaskDelete('${task.id}')" title="Delete task">
-                    🗑️
-                </button>
-            </div>
-        </div>
-    `;
-}
-
-function renderCategoryStats() {
-    const statsContainer = document.getElementById('categoryStats');
-    if (!statsContainer) return;
-    
-    const tasks = taskService.getAllTasks();
-    const categoryStats = {};
-    
-    // Initialize categories
-    const categories = ['work', 'personal', 'study', 'health', 'finance', 'shopping', 'other'];
-    categories.forEach(cat => {
-        categoryStats[cat] = { total: 0, completed: 0 };
-    });
-    
-    // Count tasks by category
-    tasks.forEach(task => {
-        if (categoryStats[task.category]) {
-            categoryStats[task.category].total++;
-            if (task.completed) {
-                categoryStats[task.category].completed++;
-            }
-        }
-    });
-    
-    // Render stats
-    const statsHTML = Object.entries(categoryStats)
-        .filter(([category, stats]) => stats.total > 0)
-        .map(([category, stats]) => {
-            const displayNames = {
-                'work': 'Work',
-                'personal': 'Personal', 
-                'study': 'Study',
-                'health': 'Health',
-                'finance': 'Finance',
-                'shopping': 'Shopping',
-                'other': 'Other'
-            };
-            
-            return `
-                <div class="category-stat-item">
-                    <h4>${displayNames[category]}</h4>
-                    <div class="stat-number">${stats.total}</div>
-                    <small>${stats.completed} completed</small>
-                </div>
-            `;
-        }).join('');
-    
-    if (statsHTML) {
-        statsContainer.innerHTML = `
-            <h3>Tasks by Category</h3>
-            <div class="category-stats">${statsHTML}</div>
-        `;
-    }
 }
 
 
